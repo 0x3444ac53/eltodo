@@ -1,0 +1,3 @@
+terminaltables
+pyyaml
+pprint
