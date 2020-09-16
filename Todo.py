@@ -16,9 +16,9 @@ class Todo:
         except FileNotFoundError:
             self.todo = []
 
-    def add(self, name: str, note=" ", urgency=0):
+    def add(self, name: str, catagory : str, note=" ", urgency=0):
         self.todo.append({'name': name, 'added': datetime.datetime.now(),
-                          'note': note, 'urgency' : urgency,
+                          'catagory' : catagory.lower(), 'note': note, 'urgency' : urgency,
                           'done' : None})
         self.todo.sort(key=lambda x: x['added'])
         self.todo.sort(key=lambda x: x['urgency'], reverse=True)
@@ -45,7 +45,8 @@ class Todo:
             '\033[31m',  # red
             '\033[31;1;4m' # red and blinking
         ]
-        table_data = [list(map(italics, ['#', 'Task', 'Note', 'Done']))]
+        table_data = [list(map(italics, ['#', 'Task', 'Note',
+                                         'Catagory', 'Done']))]
 
         for i in range(len(self.todo)):
             urgency_colour = urgency_colour_map[self.todo[i]['urgency']]
@@ -55,7 +56,9 @@ class Todo:
                     [ i,
                     f"{urgency_colour}{self.todo[i]['name']}",
                     f"{urgency_colour}{self.todo[i]['note']}",
-                    "{}".format('\u2713' if self.todo[i]['done'] else '')
+                    f"{urgency_colour}{self.todo[i]['catagory']}",
+                    "{}".format(self.todo[i]["done"].strftime('%d/%m %H:%m') if
+                                 self.todo[i]['done'] else '')
                     ]
                     )
                 )
@@ -75,7 +78,7 @@ def main():
     if "index" in vars(p):
         mainList.remove(p.index)
     elif "task" in vars(p):
-        mainList.add(p.task, note=p.note, urgency=p.urgency)
+        mainList.add(p.task, p.catagory, note=p.note, urgency=p.urgency)
     elif "doneindex" in vars(p):
         mainList.done(p.doneindex)
     print(mainList)
@@ -89,13 +92,14 @@ def pargs(removalindexs):
                                  default="")
     add_todo_parser.add_argument("-u", "--urgency", type=int,
                                  choices=[0, 1, 2, 3], default=0)
+    add_todo_parser.add_argument("-c", "--catagory", type=str,
+                                 default="General")
     removal_parser = subparsers.add_parser("remove", help="remove task")
     removal_parser.add_argument("index", type=int, choices =
                                 range(removalindexs), help="index to remove")
     done_parser = subparsers.add_parser("done", help="Set Task to Done")
     done_parser.add_argument("doneindex", type = int,
                              choices=range(removalindexs))
-    done_parser.add_argument
     return parser.parse_args()
 
 if __name__ == '__main__':
